@@ -8,4 +8,4 @@ spec:
       storage: 128Mi
   volumeMode: Filesystem
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
