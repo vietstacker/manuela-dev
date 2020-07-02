@@ -1,3 +1,4 @@
+
 import { WebsocketService } from './../providers/websocket.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
@@ -6,11 +7,11 @@ import * as HighCharts from 'highcharts';
 
 
 @Component({
-  selector: 'app-sensors',
-  templateUrl: './sensors.page.html',
-  styleUrls: ['./sensors.page.scss'],
+  selector: 'app-edge2',
+  templateUrl: './edge2.component.html',
+  styleUrls: ['./edge2.component.scss'],
 })
-export class SensorsPage implements OnInit, OnDestroy {
+export class Edge2Component implements OnInit, OnDestroy {
 
   subscriptions: Subscription[] = [];
   decoder = new TextDecoder('utf-8');
@@ -127,7 +128,7 @@ export class SensorsPage implements OnInit, OnDestroy {
     // used in UI to setup divs
     this.displayCharts.add(chartTitle);
     // save metric
-    if ( dataset[0].startsWith("floor-1")) {
+    if ( dataset[0].startsWith("floor-2")) {
       this.machineData.push(
         {
           machineId: dataset[0],
