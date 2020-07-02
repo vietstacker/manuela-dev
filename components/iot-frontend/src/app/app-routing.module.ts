@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'sensors',
     loadChildren: () => import('./sensors/sensors.module').then( m => m.SensorsPageModule)
+  },
+  {
+    path: 'edge2',
+    loadChildren: () => import('./edge2/edge2.module').then( m => m.Edge2ComponentModule)
   }
 ];
 
