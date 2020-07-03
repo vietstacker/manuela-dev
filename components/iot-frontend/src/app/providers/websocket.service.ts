@@ -60,10 +60,21 @@ export class WebsocketService {
         return observable;
     }
 
-    observeVibrationEvents() {
+    observeVibrationEvents1() {
         console.debug('observeVibrationEvents');
         const observable = new Observable(observer => {
-            this.socket.on('vibration-event', (data) => {
+            this.socket.on('vibration-event-1', (data) => {
+                // console.debug('vibration-event -> Received vibration sensor data');
+                observer.next(data);
+            });
+        });
+        return observable;
+    }
+    
+    observeVibrationEvents2() {
+        console.debug('observeVibrationEvents');
+        const observable = new Observable(observer => {
+            this.socket.on('vibration-event-2', (data) => {
                 // console.debug('vibration-event -> Received vibration sensor data');
                 observer.next(data);
             });
@@ -71,10 +82,21 @@ export class WebsocketService {
         return observable;
     }
 
-    observeTemperatureEvents() {
+    observeTemperatureEvents1() {
         console.debug('observeTemperatureEvents');
         const observable = new Observable(observer => {
-            this.socket.on('temperature-event', (data) => {
+            this.socket.on('temperature-event-1', (data) => {
+                // console.debug('temperature-event -> Received temperature sensor data');
+                observer.next(data);
+            });
+        });
+        return observable;
+    }
+    
+    observeTemperatureEvents2() {
+        console.debug('observeTemperatureEvents');
+        const observable = new Observable(observer => {
+            this.socket.on('temperature-event-2', (data) => {
                 // console.debug('temperature-event -> Received temperature sensor data');
                 observer.next(data);
             });

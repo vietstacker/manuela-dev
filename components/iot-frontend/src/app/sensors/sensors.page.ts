@@ -128,17 +128,15 @@ export class SensorsPage implements OnInit, OnDestroy {
     this.displayCharts.add(chartTitle);
     // save metric
     console.log("machineID: ", dataset[0])
-    if ( dataset[0] == 'floor-1-line-1-extruder-1' )  {
-      this.machineData.push(
-        {
-          machineId: dataset[0],
-          sensorId: dataset[1],
-          metricType: metricTyp,
-          value: Number(dataset[2]),
-          timestamp: Number(dataset[3])
-        }
-      );
-    }
+    this.machineData.push(
+      {
+        machineId: dataset[0],
+        sensorId: dataset[1],
+        metricType: metricTyp,
+        value: Number(dataset[2]),
+        timestamp: Number(dataset[3])
+      }
+    );
 
     // check if chart exists (one chart per machine)
     const m = this.charts.filter(el => el.userOptions.title.text === chartTitle);
@@ -210,12 +208,12 @@ ngOnInit() {
   });
   this.subscriptions.push(sub);
 
-  sub = this.websocketService.observeTemperatureEvents().pipe().subscribe(data => {
+  sub = this.websocketService.observeTemperatureEvents1().pipe().subscribe(data => {
     this.handleMachineData(data, 'temperature');
   });
   this.subscriptions.push(sub);
 
-  sub = this.websocketService.observeVibrationEvents().pipe().subscribe(data => {
+  sub = this.websocketService.observeVibrationEvents1().pipe().subscribe(data => {
     this.handleMachineData(data, 'vibration');
   });
   this.subscriptions.push(sub);
