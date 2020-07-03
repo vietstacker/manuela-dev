@@ -210,6 +210,8 @@ function handleTemperature(message) {
 
 async function handleVibration(message) {
     console.log('handleVibration data %s', message);
+    var data = ab2str(message);
+    const elements = data.split(',');
     if (elements[0] == 'floor-1-line-1-extruder-1' ) {
         io.sockets.emit("vibration-event-1", message);
     } else if (elements[0] == 'floor-2-line-1-extruder-1' ) {
