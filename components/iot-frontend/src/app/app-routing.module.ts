@@ -12,7 +12,7 @@ const routes: Routes = [
     loadChildren: () => import('./home/home.module').then(m => m.HomePageModule)
   },
   {
-    path: 'sensors',
+    path: 'edge1',
     loadChildren: () => import('./sensors/sensors.module').then( m => m.SensorsPageModule)
   },
   {
