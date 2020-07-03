@@ -128,7 +128,9 @@ export class Edge2Component implements OnInit, OnDestroy {
     // used in UI to setup divs
     this.displayCharts.add(chartTitle);
     // save metric
-    if ( dataset[0].startsWith("floor-2")) {
+    console.log("machineID: ", dataset[0])
+
+    if ( dataset[0] == 'floor-2-line-1-extruder-1' ) {
       this.machineData.push(
         {
           machineId: dataset[0],
