@@ -194,8 +194,11 @@ function handleTemperature(message) {
     var newData = data.replace(elements[2], modifiedValue);
     message = Buffer.from(newData, 'utf8');
 */
-    io.sockets.emit("temperature-event", message);
-
+    if (elements[0] == 'floor-1-line-1-extruder-1' ) {
+        io.sockets.emit("temperature-event-1", message);
+    } else if (elements[0] == 'floor-2-line-1-extruder-1' ) {
+        io.sockets.emit("temperature-event-2", message);
+    }
     // check for temperature threshold
     if(temperature_alert_enabled) {
         if(Number(elements[2]) > temperature_threshold) {
@@ -207,7 +210,11 @@ function handleTemperature(message) {
 
 async function handleVibration(message) {
     console.log('handleVibration data %s', message);
-    io.sockets.emit("vibration-event", message);
+    if (elements[0] == 'floor-1-line-1-extruder-1' ) {
+        io.sockets.emit("vibration-event-1", message);
+    } else if (elements[0] == 'floor-2-line-1-extruder-1' ) {
+        io.sockets.emit("vibration-event-2", message);
+    }
 
     // check for vibration anomaly
     if(vibration_alert_enabled) {
