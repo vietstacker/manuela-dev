@@ -11,13 +11,17 @@ const routes: Routes = [
     path: 'home',
     loadChildren: () => import('./home/home.module').then(m => m.HomePageModule)
   },
-  {
-    path: 'edge1',
-    loadChildren: () => import('./sensors/sensors.module').then( m => m.SensorsPageModule)
-  },
+  // {
+  //   path: 'edge1',
+  //   loadChildren: () => import('./sensors/sensors.module').then( m => m.SensorsPageModule)
+  // },
   {
     path: 'edge2',
     loadChildren: () => import('./edge2/edge2.module').then( m => m.Edge2ComponentModule)
+  },
+  {
+    path: 'edge1',
+    loadChildren: () => import('./edge1/edge1.module').then( m => m.Edge1ComponentModule)
   }
 ];
 

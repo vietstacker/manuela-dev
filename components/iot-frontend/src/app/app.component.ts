@@ -16,14 +16,19 @@ export class AppComponent {
       url: '/home',
       icon: 'home'
     },
-    {
-      title: 'Edge 1 Realtime Data',
-      url: '/sensors',
-      icon: 'list'
-    },
+    // {
+    //   title: 'Edge 1 Realtime Data',
+    //   url: '/sensors',
+    //   icon: 'list'
+    // },
     {
       title: 'Edge 2 Realtime Data',
       url: '/edge2',
+      icon: 'list'
+    },
+    {
+      title: 'Edge 1 Realtime Data',
+      url: '/edge1',
       icon: 'list'
     }
   ];
