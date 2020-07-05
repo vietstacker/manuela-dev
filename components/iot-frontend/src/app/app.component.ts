@@ -22,13 +22,13 @@ export class AppComponent {
     //   icon: 'list'
     // },
     {
-      title: 'Edge 2 Realtime Data',
-      url: '/edge2',
+      title: 'Edge 1 Realtime Data',
+      url: '/edge1',
       icon: 'list'
     },
     {
-      title: 'Edge 1 Realtime Data',
-      url: '/edge1',
+      title: 'Edge 2 Realtime Data',
+      url: '/edge2',
       icon: 'list'
     }
   ];
