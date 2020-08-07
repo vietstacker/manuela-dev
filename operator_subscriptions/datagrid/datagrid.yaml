@@ -1,0 +1,30 @@
+apiVersion: infinispan.org/v1
+kind: Infinispan
+metadata:
+  name: iot-dg
+spec:
+  container:
+    cpu: ''
+    extraJvmOpts: ''
+    memory: ''
+  expose: {}
+  image: ''
+  logging:
+    categories: 
+      org.infinispan: info
+  replicas: 1
+  security:
+    endpointEncryption:
+      certSecretName: iot-dg-certs-secret
+      certServiceName: service.beta.openshift.io
+      type: service
+  endpointSecretName: iot-dg-generated-secret
+  service:
+    container:
+      storage: ''
+    sites:
+      local:
+        expose: {}
+        name: ''
+      locations: null
+    type: Cache

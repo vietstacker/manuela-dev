@@ -1,0 +1,18 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: datagrid
+  labels:
+    app: infinispan-service
+    clusterName: iot-dg
+spec:
+  to:
+    kind: Service
+    name: iot-dg
+    weight: 100
+  port:
+    targetPort: 11222
+  tls:
+    termination: passthrough
+    insecureEdgeTerminationPolicy: None
+  wildcardPolicy: None
