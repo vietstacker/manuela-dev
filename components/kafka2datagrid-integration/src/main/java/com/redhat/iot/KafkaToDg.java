@@ -1,0 +1,176 @@
+package com.redhat.iot;
+//import java.io.File;
+//import java.io.FileInputStream;
+//import java.io.FileNotFoundException;
+//import java.io.IOException;
+import java.nio.charset.Charset;
+//import java.nio.file.Files;
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+//import java.security.cert.CertificateException;
+//import java.security.cert.CertificateFactory;
+//import java.security.cert.X509Certificate;
+//import java.util.List;
+//import java.util.Objects;
+//import java.util.Optional;
+//import java.util.stream.Collectors;
+//import java.util.stream.Stream;
+
+//import javax.net.ssl.X509TrustManager;
+//
+//import org.apache.camel.Exchange;
+import org.apache.camel.PropertyInject;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.infinispan.InfinispanConstants;
+import org.apache.camel.component.infinispan.InfinispanOperation;
+//import org.apache.camel.model.OnCompletionDefinition;
+import org.apache.camel.model.dataformat.JsonLibrary;
+//import org.apache.camel.model.rest.RestBindingMode;
+//import org.apache.camel.processor.aggregate.DefaultAggregateController;
+//import org.apache.camel.processor.aggregate.GroupedBodyAggregationStrategy;
+//import org.apache.camel.support.jsse.FilterParameters;
+//import org.apache.camel.support.jsse.SSLContextClientParameters;
+//import org.apache.camel.support.jsse.SSLContextParameters;
+//import org.apache.camel.support.jsse.TrustManagersParameters;
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ClientIntelligence;
+import org.infinispan.client.hotrod.configuration.Configuration;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.client.hotrod.configuration.SaslQop;
+import org.infinispan.commons.marshall.StringMarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+//import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+//import com.fasterxml.jackson.annotation.JsonProperty;
+//import com.fasterxml.jackson.core.JsonProcessingException;
+//import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+public class KafkaToDg extends RouteBuilder {
+	
+	private static final String CACHE_TEMPLATE = "default";
+	private static final String PATH_TO_SERVICE_CA = "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt";
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(KafkaToDg.class);
+
+	private RemoteCacheManager cacheManager;
+	private RemoteCache<String, String> TempCache; // Create a dic of type RemoteCache
+	private RemoteCache<String, String> VibrationCache;
+	//private ObjectMapper mapper = new ObjectMapper();
+	
+	@PropertyInject(value = "com.redhat.iot.datagrid.host")
+	private String datagridHost;
+	
+	@PropertyInject(value = "com.redhat.iot.datagrid.username")
+	private String datagridUsername;
+	
+	@PropertyInject(value = "com.redhat.iot.datagrid.password")
+	private String datagridPasswd;
+	
+	@PropertyInject(value = "com.redhat.iot.camelk.dg.aggregationInterval", defaultValue = "60000")
+	private long aggregationInterval;
+
+	@PropertyInject(value = "com.redhat.iot.camelk.dg.aggregationDistinct", defaultValue = "true")
+    private boolean aggregationDistinct;
+	
+	@PropertyInject(value = "com.redhat.iot.camelk.dg.temp.cacheName")
+	private String TempCacheName;
+	
+	@PropertyInject(value = "com.redhat.iot.camelk.dg.vibra.cacheName")
+	private String VibraCacheName;
+	
+	@PropertyInject(value = "com.redhat.iot.camelk.kafka.temptopic")
+	private String KafkaTempTopic;
+	
+	@PropertyInject(value = "com.redhat.iot.camelk.kafka.vibratopic")
+	private String KafkaVibraTopic;
+	
+	@PropertyInject(value = "com.redhat.iot.camelk.kafka.brokers")
+	private String KafkaBroker;
+
+	private Configuration createDGcacheconfig() { 
+		ConfigurationBuilder hotRodBuilder = new ConfigurationBuilder();
+		
+		return hotRodBuilder.addServer().host(datagridHost).port(11222)
+	        	.marshaller(new StringMarshaller(Charset.defaultCharset()))
+	        	.clientIntelligence(ClientIntelligence.BASIC)
+	        	.security()
+	        		.authentication().enable()
+	        		.username(datagridUsername)
+	        		.password(datagridPasswd)
+	        		.realm(CACHE_TEMPLATE)
+	        		.serverName("infinispan")
+	        		.saslQop(SaslQop.AUTH)
+	        		.saslMechanism("DIGEST-MD5")
+	        	.ssl()
+	        		.sniHostName(datagridHost)
+		        	.trustStorePath(PATH_TO_SERVICE_CA)
+		      .build();
+		
+	}
+	
+	private void initCache(Configuration cacheConfig) {
+		cacheManager = new RemoteCacheManager(cacheConfig);
+		cacheManager.start();
+		TempCache = cacheManager.administration().getOrCreateCache(TempCacheName, CACHE_TEMPLATE);
+		VibrationCache = cacheManager.administration().getOrCreateCache(VibraCacheName, CACHE_TEMPLATE);
+		cacheManager.start();
+	}
+	
+	private void storeTempInCacheRoute() {
+		// clear the temp cache before starting the route
+		TempCache.clear();
+
+		from("kafka:{{com.redhat.iot.camelk.kafka.temptopic}}?clientId=kafkaToDatagridCamelClient&brokers={{com.redhat.iot.camelk.kafka.brokers}}:9092" + "&groupId=A")
+			.log("Received ${body} from Kafka")	
+			.setHeader(InfinispanConstants.OPERATION).constant(InfinispanOperation.PUT)
+			.process(ex -> {
+				String mesbody = ex.getIn().getBody(String.class);
+				String[] parts = mesbody.split(",");
+				String[] newParts = new String[] {parts[0], parts[1], parts[2]};
+				String output = String.join(",", newParts);
+			    ex.getIn().setBody(output);
+			    ex.getIn().setHeader(InfinispanConstants.KEY, parts[3]);
+			})
+		    .marshal().json(JsonLibrary.Jackson, String.class)
+		    .setHeader(InfinispanConstants.VALUE).expression(simple("${body}"))
+		    .log("Saving temperature data to Infinispan cache with key: ${headers[CamelInfinispanKey]} and value: ${body} of group A")
+			.to("infinispan://{{com.redhat.iot.camelk.dg.temp.cacheName}}?cacheContainerConfiguration=#cacheContainerConfiguration")
+			;
+	}
+	
+	private void storeVibraInCacheRoute() {
+		// clear the Vibra cache before starting the route
+		VibrationCache.clear();
+
+		from("kafka:{{com.redhat.iot.camelk.kafka.vibratopic}}?clientId=kafkaToDatagridCamelClient&brokers={{com.redhat.iot.camelk.kafka.brokers}}:9092" + "&groupId=B")
+			.log("Received ${body} from Kafka")	
+			.setHeader(InfinispanConstants.OPERATION).constant(InfinispanOperation.PUT)
+			.process(ex -> {
+				String mesbody = ex.getIn().getBody(String.class);
+				String[] parts = mesbody.split(",");
+				String[] newParts = new String[] {parts[0], parts[1], parts[2]};
+				String output = String.join(",", newParts);
+			    ex.getIn().setBody(output);
+			    ex.getIn().setHeader(InfinispanConstants.KEY, parts[3]);
+			})
+		    .marshal().json(JsonLibrary.Jackson, String.class)
+		    .setHeader(InfinispanConstants.VALUE).expression(simple("${body}"))
+		    .log("Saving vibration data to Infinispan cache with key: ${headers[CamelInfinispanKey]} and value: ${body} of group B")
+			.to("infinispan://{{com.redhat.iot.camelk.dg.temp.cacheName}}?cacheContainerConfiguration=#cacheContainerConfiguration")
+			;
+	}
+	
+	@Override
+	public void configure() throws Exception {
+		// TODO Auto-generated method stub
+		Configuration cacheConfig = createDGcacheconfig();
+		initCache(cacheConfig);
+		bindToRegistry("cacheContainerConfiguration", cacheConfig);
+		storeTempInCacheRoute();
+		storeVibraInCacheRoute();
+		
+	}
+}

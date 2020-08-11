@@ -1,0 +1,13 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: iot-kafka2datagrid-cm
+data:
+  application.properties: |
+    com.redhat.iot.datagrid.host=iot-dg
+    com.redhat.iot.datagrid.username=operator
+    com.redhat.iot.datagrid.password=VkXkUmuR2vR1lu@G
+    com.redhat.iot.camelk.dg.temp.cacheName=tempcache
+    com.redhat.iot.camelk.dg.vibra.cacheName=vibracache
+    com.redhat.iot.camelk.kafka.topic=iot-sensor-sw-temperature
+    com.redhat.iot.camelk.kafka.brokers=manuela-kafka-cluster-kafka-bootstrap.default

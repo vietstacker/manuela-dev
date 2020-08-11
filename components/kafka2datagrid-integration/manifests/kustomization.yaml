@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: manuela-quickstart-messaging
+
+resources:
+#- camel-k-operator-subscription.yaml
+- camel-k-integration-platform.yaml
+- kafka2datagrid-cm.yaml
+#- kafka2datagrid-integration.yaml
+#- kafka2datagrid-secret.yaml
+#- sa-rolebinding.yaml
+#- view-zones-role.yaml
+
+
+
